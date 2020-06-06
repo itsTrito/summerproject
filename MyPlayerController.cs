@@ -11,6 +11,8 @@ public class MyPlayerController : MonoBehaviour
     private Vector2 _vel;
     
     public Character player;
+
+    private const float Tolerance = 0.05f;
     
     private void Start()
     {
@@ -21,7 +23,7 @@ public class MyPlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (rb.velocity.y != 0f)
+        if (Math.Abs(rb.velocity.y) > Tolerance)
             _vel.y += -1f * Time.deltaTime;
         else
         {
@@ -54,7 +56,7 @@ public class MyPlayerController : MonoBehaviour
             FlipX(true);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && _vel.y == 0f)
+        if (Input.GetKeyDown(KeyCode.Space) && Math.Abs(_vel.y) < Tolerance)
         {
             _vel.y = player.jumpForce;
             player.IsWalk = false;
