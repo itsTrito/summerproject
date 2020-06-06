@@ -393,7 +393,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 215432153}
   sp: {fileID: 215432154}
-  vel: {x: 0, y: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
