@@ -72,12 +72,9 @@ namespace Script.Player
                 player.IsCrouch = false;
             }
 
-            if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(_vel.y) < Tolerance)
+            if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(_vel.y) < 0.001f)
             {
-                _vel.y = player.JumpForce;
-                player.IsJumping = true;
-                player.OnGround = false;
-                player.IsCrouch = false;
+                _vel.y = Jump();
             }
 
             rb.velocity = _vel;
@@ -93,6 +90,14 @@ namespace Script.Player
             player.IsWalk = !player.IsJumping;
             FlipX(flip);
             return (!player.IsArmed?player.WalkSpeed:player.ArmedWalkSpeed);
+        }
+
+        private float Jump()
+        {
+            player.IsJumping = true;
+            player.OnGround = false;
+            player.IsCrouch = false;
+            return player.JumpForce / (player.IsArmed?1.5f:1f);
         }
 
         private void FlipX(bool flip)
