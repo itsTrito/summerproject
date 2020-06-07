@@ -17,6 +17,7 @@ namespace Script.Player
         private static readonly int Jumping = Animator.StringToHash("Jumping");
         private static readonly int Walk = Animator.StringToHash("Walk");
         private static readonly int Crouch = Animator.StringToHash("Crouch");
+        private static readonly int Armed = Animator.StringToHash("Armed");
 
         private const float Tolerance = 0.05f;
 
@@ -40,14 +41,19 @@ namespace Script.Player
                     player.IsJumping = false;
             }
 
+            if (Input.GetKeyDown(KeyCode.Q) && !player.IsJumping && !player.IsCrouch && !player.IsWalk)
+            {
+                player.IsArmed = !player.IsArmed;
+            }
+
             if (Input.GetKey(KeyCode.D) && (!player.IsCrouch || player.IsCrouch && player.IsWalk))
             {
-                MoveRight();
+                _vel.x = Move(false);
             }
             
             if (Input.GetKey(KeyCode.A) && (!player.IsCrouch || player.IsCrouch && player.IsWalk))
             {
-                MoveLeft();
+                _vel.x = -Move(true);
             }
 
             if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A))
@@ -56,9 +62,14 @@ namespace Script.Player
                 player.IsWalk = false;
             }
 
-            if (Input.GetKeyDown(KeyCode.S))
+            if (Input.GetKeyDown(KeyCode.LeftControl) && !player.IsArmed)
             {
-                player.IsCrouch = !player.IsCrouch;
+                player.IsCrouch = true;
+            }
+
+            if (Input.GetKeyUp(KeyCode.LeftControl) && !player.IsArmed)
+            {
+                player.IsCrouch = false;
             }
 
             if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(_vel.y) < Tolerance)
@@ -74,20 +85,14 @@ namespace Script.Player
             an.SetBool(Jumping, player.IsJumping);
             an.SetBool(Walk, player.IsWalk);
             an.SetBool(Crouch, player.IsCrouch);
+            an.SetBool(Armed, player.IsArmed);
         }
 
-        private void MoveRight()
+        private float Move(bool flip)
         {
             player.IsWalk = !player.IsJumping;
-            _vel.x = (!player.IsArmed?player.WalkSpeed:player.ArmedWalkSpeed);
-            FlipX(false);
-        }
-
-        private void MoveLeft()
-        {
-            player.IsWalk = !player.IsJumping;
-            _vel.x = -(!player.IsArmed?player.WalkSpeed:player.ArmedWalkSpeed);
-            FlipX(true);
+            FlipX(flip);
+            return (!player.IsArmed?player.WalkSpeed:player.ArmedWalkSpeed);
         }
 
         private void FlipX(bool flip)

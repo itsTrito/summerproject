@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SlideToCrouch
+  m_Name: PickWeapon
   serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
@@ -20,11 +20,13 @@ AnimationClip:
   m_PPtrCurves:
   - curve:
     - time: 0
-      value: {fileID: 21300000, guid: 0477ad2cd3e12ba4a821e5fc999a5e61, type: 3}
+      value: {fileID: 21300000, guid: cae5d1bf9fc91bf4ea870db4c5c1c1a5, type: 3}
     - time: 0.083333336
-      value: {fileID: 21300000, guid: cd9c2d6ee059c9d4a83a265ece771609, type: 3}
+      value: {fileID: 21300000, guid: 9044e5528ba53994c985b8ea87133f86, type: 3}
     - time: 0.16666667
-      value: {fileID: 21300000, guid: cbf79dc9318ed5c4ab7081b4f8a54bbe, type: 3}
+      value: {fileID: 21300000, guid: de3e4b1b774d4504692030a90e2024a5, type: 3}
+    - time: 0.25
+      value: {fileID: 21300000, guid: d885cf405aa06b14aa0e3eaf696a7a65, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
@@ -44,15 +46,16 @@ AnimationClip:
       customType: 23
       isPPtrCurve: 1
     pptrCurveMapping:
-    - {fileID: 21300000, guid: 0477ad2cd3e12ba4a821e5fc999a5e61, type: 3}
-    - {fileID: 21300000, guid: cd9c2d6ee059c9d4a83a265ece771609, type: 3}
-    - {fileID: 21300000, guid: cbf79dc9318ed5c4ab7081b4f8a54bbe, type: 3}
+    - {fileID: 21300000, guid: cae5d1bf9fc91bf4ea870db4c5c1c1a5, type: 3}
+    - {fileID: 21300000, guid: 9044e5528ba53994c985b8ea87133f86, type: 3}
+    - {fileID: 21300000, guid: de3e4b1b774d4504692030a90e2024a5, type: 3}
+    - {fileID: 21300000, guid: d885cf405aa06b14aa0e3eaf696a7a65, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 0.25
+    m_StopTime: 0.33333334
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
