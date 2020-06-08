@@ -1,108 +1,135 @@
-﻿using System;
-using Script.BaseCharacter;
+﻿using System.Collections;
+using BaseCharacter;
 using UnityEngine;
 
-namespace Script.Player
+namespace Player
 {
-    public class MyPlayerController : MonoBehaviour
+    public class MyPlayerController : TypeCharacter
     {
-        public Rigidbody2D rb;
-        public SpriteRenderer sp;
-        public Animator an;
-
-        private Vector2 _vel;
-    
-        public Character player;
         private static readonly int OnGround = Animator.StringToHash("OnGround");
         private static readonly int Jumping = Animator.StringToHash("Jumping");
         private static readonly int Walk = Animator.StringToHash("Walk");
         private static readonly int Crouch = Animator.StringToHash("Crouch");
         private static readonly int Armed = Animator.StringToHash("Armed");
+        private static readonly int AttackType = Animator.StringToHash("AttackType");
+        private static readonly int BigAttackStart = Animator.StringToHash("BigAttackStart");
+        private static readonly int BigAttackEnd = Animator.StringToHash("BigAttackEnd");
 
-        private const float Tolerance = 0.05f;
+        private int _slide = 0;
 
-        private void Start()
+        private void Awake()
         {
-            player = new Character(4f, 2f, 8f);
-            player.setLife(10f);
+            character = new Character(4f, 2f, 8f, -8f, 10);
+            Sp = GetComponent<SpriteRenderer>();
+            An = GetComponent<Animator>();
+            Rb = GetComponent<Rigidbody2D>();
+            collider = GetComponent<BoxCollider2D>();
+            Vel = new Vector2();
+            character.SetAttackPossibility(3,2);
         }
 
         private void FixedUpdate()
         {
-            if (Mathf.Abs(rb.velocity.y) > Tolerance)
-                _vel.y += -8f * Time.deltaTime;
+            InAir();
+            An.SetInteger(AttackType,0);
+
+            //Prendre/Enlever arme
+            if (Input.GetKeyDown(KeyCode.Q) && !character.IsJumping && !character.IsCrouch && !character.IsWalk)
+            {
+                character.IsArmed = !character.IsArmed;
+            }
+
+            //Mouvement gauche/droite
+            if ((!character.IsCrouch || character.IsCrouch && character.IsWalk) && !character.DoAttack() && character.OnGround)
+            {
+                if (Input.GetKey(KeyCode.A))
+                    Move(true);
+                
+                if (Input.GetKey(KeyCode.D))
+                    Move(false);
+            }
+            else if (character.IsWalk && character.OnGround)
+                Stop();
+
+            if ((Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A)) && character.OnGround)
+            {
+                Stop();
+            }
+
+            //Crouch
+            if (Input.GetKeyDown(KeyCode.LeftControl) && !character.IsArmed)
+            {
+                character.IsCrouch = true;
+                if (character.IsWalk)
+                {
+                    collider.size = new Vector2(0.2f, 0.1734726f);
+                    collider.offset = new Vector2(0f, -0.09326369f);
+                    StartCoroutine(DoSlide());
+                }
+                else
+                {
+                    collider.size = new Vector2(0.2f, 0.2184089f);
+                    collider.offset = new Vector2(0f, -0.07079558f);
+                }
+            }
             else
             {
-                if (Math.Abs(rb.velocity.y) < 0.001f)
-                    if (!player.OnGround)
-                        player.OnGround = true;
-                _vel.y = 0f;
-                if (player.IsJumping)
-                    player.IsJumping = false;
+                if (character.IsCrouch && (_slide == 2 || Input.GetKeyUp(KeyCode.LeftControl)))
+                {
+                    character.IsCrouch = false;
+                    _slide = 1;
+                    collider.size = new Vector2(0.2f, 0.3f);
+                    collider.offset = new Vector2(0f, -0.03f);
+                }
             }
 
-            if (Input.GetKeyDown(KeyCode.Q) && !player.IsJumping && !player.IsCrouch && !player.IsWalk)
+            //Attack
+            if ((!character.IsWalk || !character.OnGround) && character.IsArmed)
             {
-                player.IsArmed = !player.IsArmed;
+                if (Input.GetKey(KeyCode.Mouse0))
+                {
+                    An.SetInteger(AttackType, character.OnGround ? GroundAttack() : AirAttack());
+                    StartCoroutine(Attack(1.5f));
+                }
+
+                if (!character.DoAttack() && !character.OnGround)
+                {
+                    if (Input.GetKeyDown(KeyCode.Mouse1))
+                    {
+                        An.SetTrigger(BigAttackStart);
+                        character.IsBigAttacking = true;
+                    }
+                }
+                
+                if (character.IsBigAttacking)
+                {
+                    if (character.OnGround || Input.GetKeyUp(KeyCode.Mouse1))
+                    {
+                        An.SetTrigger(BigAttackEnd);
+                        StartCoroutine(BigAttack(0.5f, new int[]{BigAttackStart, BigAttackEnd}));
+                    }
+                }
             }
 
-            if (Input.GetKey(KeyCode.D) && (!player.IsCrouch || player.IsCrouch && player.IsWalk))
+            //Saut
+            if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(Vel.y) < 0.001f)
             {
-                _vel.x = Move(false);
-            }
-            
-            if (Input.GetKey(KeyCode.A) && (!player.IsCrouch || player.IsCrouch && player.IsWalk))
-            {
-                _vel.x = -Move(true);
+                Vel.y = character.Jump();
             }
 
-            if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A))
-            {
-                _vel.x = 0f;
-                player.IsWalk = false;
-            }
-
-            if (Input.GetKeyDown(KeyCode.LeftControl) && !player.IsArmed)
-            {
-                player.IsCrouch = true;
-            }
-
-            if (Input.GetKeyUp(KeyCode.LeftControl) && !player.IsArmed)
-            {
-                player.IsCrouch = false;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(_vel.y) < 0.001f)
-            {
-                _vel.y = Jump();
-            }
-
-            rb.velocity = _vel;
-            an.SetBool(OnGround, player.OnGround);
-            an.SetBool(Jumping, player.IsJumping);
-            an.SetBool(Walk, player.IsWalk);
-            an.SetBool(Crouch, player.IsCrouch);
-            an.SetBool(Armed, player.IsArmed);
+            //Animateur/déplacement
+            Rb.velocity = Vel;
+            An.SetBool(OnGround, character.OnGround);
+            An.SetBool(Jumping, character.IsJumping);
+            An.SetBool(Walk, character.IsWalk);
+            An.SetBool(Crouch, character.IsCrouch);
+            An.SetBool(Armed, character.IsArmed);
         }
 
-        private float Move(bool flip)
+        private IEnumerator DoSlide()
         {
-            player.IsWalk = !player.IsJumping;
-            FlipX(flip);
-            return (!player.IsArmed?player.WalkSpeed:player.ArmedWalkSpeed);
-        }
-
-        private float Jump()
-        {
-            player.IsJumping = true;
-            player.OnGround = false;
-            player.IsCrouch = false;
-            return player.JumpForce / (player.IsArmed?1.5f:1f);
-        }
-
-        private void FlipX(bool flip)
-        {
-            sp.flipX = flip;
+            yield return new WaitForSeconds(0.5f);
+            _slide = _slide == 0 ? 2 : 0;
         }
     }
 }
