@@ -6,7 +6,7 @@ namespace Player
 {
     public class MyPlayerController : TypeCharacter
     {
-        private static readonly int OnGround = Animator.StringToHash("OnGround");
+        public static readonly int OnGround = Animator.StringToHash("OnGround");
         private static readonly int Jumping = Animator.StringToHash("Jumping");
         private static readonly int Walk = Animator.StringToHash("Walk");
         private static readonly int Crouch = Animator.StringToHash("Crouch");
@@ -48,13 +48,28 @@ namespace Player
                 if (Input.GetKey(KeyCode.D))
                     Move(false);
             }
-            else if (character.IsWalk && character.OnGround)
+            else 
                 Stop();
 
-            if ((Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.A)) && character.OnGround)
+            if (((Input.GetKeyUp(KeyCode.D)) || (Input.GetKeyUp(KeyCode.A))) && character.OnGround)
             {
                 Stop();
             }
+
+		void OnCollisionEnter2D(Collision2D collision){
+            if (collision.collider.tag == "Ground")
+            {
+              	character.OnGround = true;
+            }
+        }
+
+        void OnCollisionExit2D(Collision2D collision)
+        {
+            if (collision.collider.tag == "Ground")
+            {
+                character.OnGround = false;
+            }
+        }
 
             //Crouch
             if (Input.GetKeyDown(KeyCode.LeftControl) && !character.IsArmed)

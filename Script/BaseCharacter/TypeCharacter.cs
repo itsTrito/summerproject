@@ -12,7 +12,7 @@ namespace BaseCharacter
         protected Vector2 Vel;
 
         public Character character;
-
+        public GameObject Player;
         private void FLipX(bool flip)
         {
             Sp.flipX = flip;
@@ -20,7 +20,8 @@ namespace BaseCharacter
 
         protected void Move(bool flip)
         {
-            Vel.x = character.Move() * (flip?-1:1);
+            Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), 0f, 0f);
+            transform.position += movement * Time.deltaTime * character.Move();
             FLipX(flip);
         }
 
